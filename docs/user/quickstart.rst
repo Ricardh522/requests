@@ -73,13 +73,12 @@ You can see that the URL has been correctly encoded by printing the URL::
 Note that any dictionary key whose value is ``None`` will not be added to the
 URL's query string.
 
-In order to pass a list of items as a value you must mark the key as
-referring to a list like string by appending ``[]`` to the key::
+You can also pass a list of items as a value::
 
-    >>> payload = {'key1': 'value1', 'key2[]': ['value2', 'value3']}
+    >>> payload = {'key1': 'value1', 'key2': ['value2', 'value3']}
     >>> r = requests.get("http://httpbin.org/get", params=payload)
     >>> print(r.url)
-    http://httpbin.org/get?key1=value1&key2%5B%5D=value2&key2%5B%5D=value3
+    http://httpbin.org/get?key1=value1&key2=value2&key2=value3
 
 Response Content
 ----------------
@@ -182,13 +181,22 @@ Custom Headers
 If you'd like to add HTTP headers to a request, simply pass in a ``dict`` to the
 ``headers`` parameter.
 
-For example, we didn't specify our content-type in the previous example::
+For example, we didn't specify our user-agent in the previous example::
 
     >>> import json
     >>> url = 'https://api.github.com/some/endpoint'
     >>> headers = {'user-agent': 'my-app/0.0.1'}
 
     >>> r = requests.get(url, headers=headers)
+
+Note: Custom headers are given less precedence than more specific sources of information. For instance:
+
+* Authorization headers will be overridden if credentials are passed via the ``auth`` parameter or are specified in a ``.netrc`` accessible in the environment.
+* Authorization headers will be removed if you get redirected off-host.
+* Proxy-Authorization headers will be overridden by proxy credentials provided in the URL.
+* Content-Length headers will be overridden when we can determine the length of the content.
+
+Furthermore, Requests does not change its behavior at all based on which custom headers are specified. The headers are simply passed on into the final request.
 
 
 More complicated POST requests
